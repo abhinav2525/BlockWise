@@ -43,7 +43,7 @@ contract Blockwise {
         address walletAddress;
     }
 
-    Friend[] public friends;
+    Friend[] private friends;
     //Struct for storing Requests and their status (pending/accepted or rejected).
 
     mapping(address => userName) names;
@@ -56,8 +56,28 @@ contract Blockwise {
         newUserName.hasName = true;
     }
 
-    function addFriend(address _walletAddress, string memory _name) public {
-        friends.push(Friend(_name, _walletAddress));
+    // function addFriend(address _walletAddress, string memory _name) public {
+    //     friends.push(Friend(_name, _walletAddress));
+    // }
+
+
+    function addFriend(address _walletAddress) public {
+        // Check if the friend's address exists in the names mapping and has a name
+        require(
+            names[_walletAddress].hasName == true,
+            "This address has not interacted with the contract or set a name"
+        );
+
+        // Check for duplicates
+        for (uint i = 0; i < friends.length; i++) {
+            require(
+                friends[i].walletAddress != _walletAddress,
+                "This friend already exists"
+            );
+        }
+
+        // Add friend
+        friends.push(Friend(names[_walletAddress].name, _walletAddress));
     }
 
     function getAllFriends()
