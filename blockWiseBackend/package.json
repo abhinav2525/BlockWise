@@ -1,0 +1,21 @@
+{
+  "name": "blockwisebackend",
+  "version": "1.0.0",
+  "description": "intracting with smart contract and front end",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Abhinav Krishna Palla Sravana Kumar",
+  "license": "ISC",
+  "dependencies": {
+    "@moralisweb3/common-evm-utils": "^2.22.3",
+    "axios": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "moralis": "^2.22.3",
+    "react-router-dom": "^6.14.1"
+  }
+}
