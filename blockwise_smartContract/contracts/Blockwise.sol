@@ -39,89 +39,92 @@ contract Blockwise {
     }
 
     struct Friend {
-        string name;
-        address walletAddress;
-    }
+    string name;
+    address walletAddress;
+}
 
-    Friend[] private friends;
+// Each user has a unique set of friends.
+mapping(address => Friend[]) private friends;
 
-    struct GroupRequest {
-        uint256 totalAmount;
-        mapping(address => bool) acceptances;
-        bool active;
-        string description;
-    }
 
-    GroupRequest[] public groupRequests;
 
-    // Function to create a group request
-    function createGroupRequest(
-        uint256 totalAmount,
-        string memory description
-    ) public returns (uint) {
-        GroupRequest storage newGroupRequest = groupRequests.push();
-        newGroupRequest.totalAmount = totalAmount;
-        newGroupRequest.active = true;
-        newGroupRequest.description = description;
-        return groupRequests.length - 1; // Returning index of created object in array
-    }
+    // struct GroupRequest {
+    //     uint256 totalAmount;
+    //     mapping(address => bool) acceptances;
+    //     bool active;
+    //     string description;
+    // }
 
-    // Function for a friend to accept a group request
-    function acceptGroupRequest(uint groupRequestId, bool _active) public {
-        GroupRequest storage groupRequest = groupRequests[groupRequestId];
+    // GroupRequest[] public groupRequests;
 
-        // Check if the request is active
-        require(groupRequest.active, "Group request is not active");
+    // // Function to create a group request
+    // function createGroupRequest(
+    //     uint256 totalAmount,
+    //     string memory description
+    // ) public returns (uint) {
+    //     GroupRequest storage newGroupRequest = groupRequests.push();
+    //     newGroupRequest.totalAmount = totalAmount;
+    //     newGroupRequest.active = true;
+    //     newGroupRequest.description = description;
+    //     return groupRequests.length - 1; // Returning index of created object in array
+    // }
 
-        require(
-            !groupRequest.acceptances[msg.sender],
-            "You have already accepted the request"
-        );
+    // // Function for a friend to accept a group request
+    // function acceptGroupRequest(uint groupRequestId, bool _active) public {
+    //     GroupRequest storage groupRequest = groupRequests[groupRequestId];
 
-        // Mark the request as accepted by the sender
-        groupRequest.acceptances[msg.sender] = _active;
-    }
+    //     // Check if the request is active
+    //     require(groupRequest.active, "Group request is not active");
 
-    // Function for sending messages within groups
-    // Function to execute the payment split of a group request
-    function executeGroupRequest(uint groupRequestId) public {
-        GroupRequest storage groupRequest = groupRequests[groupRequestId];
+    //     require(
+    //         !groupRequest.acceptances[msg.sender],
+    //         "You have already accepted the request"
+    //     );
 
-        // Check that the request is active
-        require(groupRequest.active, "Group request is not active");
+    //     // Mark the request as accepted by the sender
+    //     groupRequest.acceptances[msg.sender] = _active;
+    // }
 
-        // Count the number of friends who have accepted and total friends involved in the request
-        uint numberOfAcceptors = 0;
-        uint totalFriends = friends.length;
+    // // Function for sending messages within groups
+    // // Function to execute the payment split of a group request
+    // function executeGroupRequest(uint groupRequestId) public {
+    //     GroupRequest storage groupRequest = groupRequests[groupRequestId];
 
-        for (uint i = 0; i < totalFriends; i++) {
-            if (groupRequest.acceptances[friends[i].walletAddress] == true) {
-                numberOfAcceptors++;
-            }
-        }
+    //     // Check that the request is active
+    //     require(groupRequest.active, "Group request is not active");
 
-        // Check if the acceptance is more than 40%
-        require(
-            (numberOfAcceptors * 100) / totalFriends >= 40,
-            "At least 40% of friends need to accept the request before execution"
-        );
+    //     // Count the number of friends who have accepted and total friends involved in the request
+    //     uint numberOfAcceptors = 0;
+    //     uint totalFriends = friends.length;
 
-        uint amountPerPersonInWei = (groupRequest.totalAmount * 1 ether) /
-            numberOfAcceptors;
+    //     for (uint i = 0; i < totalFriends; i++) {
+    //         if (groupRequest.acceptances[friends[i].walletAddress] == true) {
+    //             numberOfAcceptors++;
+    //         }
+    //     }
 
-        for (uint i = 0; i < totalFriends; i++) {
-            if (groupRequest.acceptances[friends[i].walletAddress] == true) {
-                createRequest(
-                    friends[i].walletAddress,
-                    amountPerPersonInWei,
-                    "Group Request Payment"
-                );
-            }
-        }
+    //     // Check if the acceptance is more than 40%
+    //     require(
+    //         (numberOfAcceptors * 100) / totalFriends >= 40,
+    //         "At least 40% of friends need to accept the request before execution"
+    //     );
 
-        // Once the payment has been distributed, mark the group request as inactive
-        groupRequest.active = false;
-    }
+    //     uint amountPerPersonInWei = (groupRequest.totalAmount * 1 ether) /
+    //         numberOfAcceptors;
+
+    //     for (uint i = 0; i < totalFriends; i++) {
+    //         if (groupRequest.acceptances[friends[i].walletAddress] == true) {
+    //             createRequest(
+    //                 friends[i].walletAddress,
+    //                 amountPerPersonInWei,
+    //                 "Group Request Payment"
+    //             );
+    //         }
+    //     }
+
+    //     // Once the payment has been distributed, mark the group request as inactive
+    //     groupRequest.active = false;
+    // }
 
     //Struct for storing Requests and their status (pending/accepted or rejected).
     mapping(address => userName) names;
@@ -138,41 +141,43 @@ contract Blockwise {
     //     friends.push(Friend(_name, _walletAddress));
     // }
 
-    function addFriend(address _walletAddress) public {
-        // Check if the friend's address exists in the names mapping and has a name
+function addFriend(address _walletAddress) public {
+    // Check if the friend's address exists in the names mapping and has a name
+    require(
+        names[_walletAddress].hasName == true,
+        "This address has not interacted with the contract or set a name"
+    );
+
+    // Check for duplicates
+    for (uint i = 0; i < friends[msg.sender].length; i++) {
         require(
-            names[_walletAddress].hasName == true,
-            "This address has not interacted with the contract or set a name"
+            friends[msg.sender][i].walletAddress != _walletAddress,
+            "This friend already exists"
         );
-
-        // Check for duplicates
-        for (uint i = 0; i < friends.length; i++) {
-            require(
-                friends[i].walletAddress != _walletAddress,
-                "This friend already exists"
-            );
-        }
-
-        // Add friend
-        friends.push(Friend(names[_walletAddress].name, _walletAddress));
     }
 
-    function getAllFriends()
-        public
-        view
-        returns (string[] memory, address[] memory)
-    {
-        string[] memory friendNames = new string[](friends.length);
-        address[] memory friendAddresses = new address[](friends.length);
+    // Add friend
+    friends[msg.sender].push(Friend(names[_walletAddress].name, _walletAddress));
+}
 
-        for (uint i = 0; i < friends.length; i++) {
-            Friend storage friend = friends[i];
-            friendNames[i] = friend.name;
-            friendAddresses[i] = friend.walletAddress;
-        }
 
-        return (friendNames, friendAddresses);
+function getAllFriends(address _user)
+    public
+    view
+    returns (string[] memory, address[] memory)
+{
+    string[] memory friendNames = new string[](friends[_user].length);
+    address[] memory friendAddresses = new address[](friends[_user].length);
+
+    for (uint i = 0; i < friends[_user].length; i++) {
+        Friend storage friend = friends[_user][i];
+        friendNames[i] = friend.name;
+        friendAddresses[i] = friend.walletAddress;
     }
+
+    return (friendNames, friendAddresses);
+}
+
 
     //Create a Request
 
