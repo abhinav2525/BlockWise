@@ -44,8 +44,86 @@ contract Blockwise {
     }
 
     Friend[] private friends;
-    //Struct for storing Requests and their status (pending/accepted or rejected).
 
+    struct GroupRequest {
+        uint256 totalAmount;
+        mapping(address => bool) acceptances;
+        bool active;
+        string description;
+    }
+
+    GroupRequest[] public groupRequests;
+
+    // Function to create a group request
+    function createGroupRequest(
+        uint256 totalAmount,
+        string memory description
+    ) public returns (uint) {
+        GroupRequest storage newGroupRequest = groupRequests.push();
+        newGroupRequest.totalAmount = totalAmount;
+        newGroupRequest.active = true;
+        newGroupRequest.description = description;
+        return groupRequests.length - 1; // Returning index of created object in array
+    }
+
+    // Function for a friend to accept a group request
+    function acceptGroupRequest(uint groupRequestId, bool _active) public {
+        GroupRequest storage groupRequest = groupRequests[groupRequestId];
+
+        // Check if the request is active
+        require(groupRequest.active, "Group request is not active");
+
+        require(
+            !groupRequest.acceptances[msg.sender],
+            "You have already accepted the request"
+        );
+
+        // Mark the request as accepted by the sender
+        groupRequest.acceptances[msg.sender] = _active;
+    }
+
+    // Function for sending messages within groups
+    // Function to execute the payment split of a group request
+    function executeGroupRequest(uint groupRequestId) public {
+        GroupRequest storage groupRequest = groupRequests[groupRequestId];
+
+        // Check that the request is active
+        require(groupRequest.active, "Group request is not active");
+
+        // Count the number of friends who have accepted and total friends involved in the request
+        uint numberOfAcceptors = 0;
+        uint totalFriends = friends.length;
+
+        for (uint i = 0; i < totalFriends; i++) {
+            if (groupRequest.acceptances[friends[i].walletAddress] == true) {
+                numberOfAcceptors++;
+            }
+        }
+
+        // Check if the acceptance is more than 40%
+        require(
+            (numberOfAcceptors * 100) / totalFriends >= 40,
+            "At least 40% of friends need to accept the request before execution"
+        );
+
+        uint amountPerPersonInWei = (groupRequest.totalAmount * 1 ether) /
+            numberOfAcceptors;
+
+        for (uint i = 0; i < totalFriends; i++) {
+            if (groupRequest.acceptances[friends[i].walletAddress] == true) {
+                createRequest(
+                    friends[i].walletAddress,
+                    amountPerPersonInWei,
+                    "Group Request Payment"
+                );
+            }
+        }
+
+        // Once the payment has been distributed, mark the group request as inactive
+        groupRequest.active = false;
+    }
+
+    //Struct for storing Requests and their status (pending/accepted or rejected).
     mapping(address => userName) names;
     mapping(address => request[]) requests;
     mapping(address => sendReceive[]) history;
@@ -59,7 +137,6 @@ contract Blockwise {
     // function addFriend(address _walletAddress, string memory _name) public {
     //     friends.push(Friend(_name, _walletAddress));
     // }
-
 
     function addFriend(address _walletAddress) public {
         // Check if the friend's address exists in the names mapping and has a name
