@@ -92,8 +92,8 @@ contract Blockwise {
             groupRequestId
         ];
 
-        // check  owner cannot acceptGroupRequest 
-        require(groupRequest.requestor == msg.sender,"Creator cannot accept the request");
+        // check if owner can of executeGroupRequest
+        require(groupRequest.requestor == msg.sender,"Only Creator can execute Request");
 
         // Check if the group request is active
         require(groupRequest.active, "Group request is not active");
