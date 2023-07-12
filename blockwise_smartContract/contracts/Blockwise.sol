@@ -92,8 +92,11 @@ contract Blockwise {
             groupRequestId
         ];
 
-        // check  owner cannot acceptGroupRequest 
-        require(groupRequest.requestor == msg.sender,"Creator cannot accept the request");
+        // check  owner cannot acceptGroupRequest
+        require(
+            groupRequest.requestor != msg.sender,
+            "Creator cannot accept the request"
+        );
 
         // Check if the group request is active
         require(groupRequest.active, "Group request is not active");
@@ -111,37 +114,42 @@ contract Blockwise {
         groupRequest.acceptances[msg.sender] = true;
     }
 
-
     function executeGroupRequest(address creator, uint groupRequestId) public {
         // Fetch the groupRequest using the ID
-        GroupRequest storage groupRequest = userGroupRequests[creator][groupRequestId];
+        GroupRequest storage groupRequest = userGroupRequests[creator][
+            groupRequestId
+        ];
 
         // check if owner can of executeGroupRequest
-        require(groupRequest.requestor == msg.sender,"Only Creator can execute Request");
-
+        require(
+            groupRequest.requestor == msg.sender,
+            "Only Creator can execute Request"
+        );
 
         // Check if the group request is active
         require(groupRequest.active, "Group request is not active");
 
         // Check if numberOfAcceptances is more than 40%
-        
+
         require(groupRequest.numberOfAcceptances > 0, "Not enough acceptances");
 
         // Split the total amount amongst all participants and convert to wei
-        uint256 individualAmount = (groupRequest.totalAmount) / (groupRequest.participants.length + 1);
+        uint256 individualAmount = (groupRequest.totalAmount) /
+            (groupRequest.participants.length + 1);
 
         // Create a request for each participant
         for (uint i = 0; i < groupRequest.participants.length; i++) {
             // Using createRequest() function to create a payment request for each participant
-            createRequest(groupRequest.participants[i], individualAmount, "Group request payment");
+            createRequest(
+                groupRequest.participants[i],
+                individualAmount,
+                "Group request payment"
+            );
         }
 
         // Mark the groupRequest as inactive
         groupRequest.active = false;
-}
-
-
-
+    }
 
     //Struct for storing Requests and their status (pending/accepted or rejected).
     mapping(address => userName) names;
@@ -154,12 +162,14 @@ contract Blockwise {
         newUserName.hasName = true;
     }
 
-    // function addFriend(address _walletAddress, string memory _name) public {
-    //     friends.push(Friend(_name, _walletAddress));
-    // }
-
     function addFriend(address _walletAddress) public {
         // Check if the friend's address exists in the names mapping and has a name
+
+        require(
+            msg.sender != _walletAddress,
+            "Cannot add your address to friends list"
+        );
+
         require(
             names[_walletAddress].hasName == true,
             "This address has not interacted with the contract or set a name"
@@ -201,7 +211,7 @@ contract Blockwise {
         uint256 _amount,
         string memory _message
     ) public {
-        // TODO: change 
+        // TODO: change
         request memory newRequest;
         newRequest.requestor = payable(msg.sender); // person who is initiating the request
         newRequest.amount = _amount;
@@ -221,7 +231,7 @@ contract Blockwise {
         request[] storage myRequests = requests[msg.sender];
         request storage payableRequest = myRequests[_request];
 
-        uint256 toPay = payableRequest.amount;
+        uint256 toPay = payableRequest.amount * 1000000000000000000;
         require(msg.value == (toPay), "Pay Correct Amount");
 
         payableRequest.requestor.transfer(toPay);
