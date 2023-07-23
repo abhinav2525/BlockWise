@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { Layout, Button, Modal, Input, InputNumber } from "antd";
 import { useConnect, useAccount, useDisconnect } from "wagmi";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import { DollarOutlined, FormOutlined } from "@ant-design/icons";
 import {
   usePrepareContractWrite,
   useContractWrite,
@@ -10,6 +8,8 @@ import {
 } from "wagmi";
 import { polygonMumbai } from "@wagmi/chains";
 import axios from "axios";
+import ConnectButton from "./components/ConnectButton";
+import ProfileInfo from "./components/ProfileInfo";
 const ABI = require("./abi.json");
 
 function App() {
@@ -37,7 +37,6 @@ function App() {
     setRequests({ 1: [0], 0: [] });
   }
 
-  console.log({ address: process.env.REACT_APP_BLOCKWISE_ADDRESS });
   const { config, error } = usePrepareContractWrite({
     address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
     abi: ABI,
@@ -72,84 +71,32 @@ function App() {
     setModalName("");
   };
 
-  // function changeReceiver(e){
-  //   modalName(e.target.value)
-  // }
-
   useEffect(() => {
     if (!isConnected) return;
     getNameAndBalance();
-    // showNameModal();
   }, [isConnected, address]);
-
-  useEffect(() => {
-    // console.log({ data, isLoading, isSuccess });
-    console.log({ config });
-  }, [config]);
 
   return (
     <div className="App">
       <>
         {isConnected ? (
           <>
-            <h5>Connected Wallet: {address}</h5>
-            {name ? (
-              <>
-                <p>(Name : {name})</p>
-                {balance && <p>(polygon balance: {balance})</p>}
-                {dollars && <p>(polygon balance in USD: {dollars})</p>}
-                <Button type={"primary"} onClick={disconnectAndSetNull}>
-                  Disconnect Wallet
-                </Button>
-              </>
-            ) : (
-              <>
-                <Modal
-                  title="Enter the name"
-                  open={nameModal}
-                  onCancel={hideNameModal}
-                  onOk={() => {
-                    write();
-                    hideNameModal();
-                  }}
-                  okText="Set UserName"
-                  cancelText="Cancel"
-                >
-                  <p>User Name</p>
-                  <Input
-                    placeholder="Enter the user name"
-                    value={modalName}
-                    onChange={(val) => {
-                      setModalName(val.target.value);
-                    }}
-                  />
-                  {/* <Input placeholder="Enter the user name" onChange={changeReceiver} /> */}
-                </Modal>
-                <div>
-                  <Button
-                    type={"primary"}
-                    className="quickOption"
-                    onClick={() => {
-                      showNameModal();
-                    }}
-                  >
-                    <FormOutlined style={{ fontSize: "18px" }} />
-                    set username
-                  </Button>
-                </div>
-              </>
-            )}
+            <ProfileInfo
+              name={name}
+              address={address}
+              balance={balance}
+              dollars={dollars}
+              disconnectAndSetNull={disconnectAndSetNull}
+              nameModal={nameModal}
+              hideNameModal={hideNameModal}
+              modalName={modalName}
+              setModalName={setModalName}
+              showNameModal={showNameModal}
+              write={write}
+            />
           </>
         ) : (
-          <Button
-            type={"primary"}
-            onClick={() => {
-              console.log(requests);
-              connect();
-            }}
-          >
-            Connect Wallet
-          </Button>
+          <ConnectButton connect={connect} />
         )}
       </>
     </div>
