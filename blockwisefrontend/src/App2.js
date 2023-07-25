@@ -15,6 +15,7 @@ import CurrentBalance from "./components/CurrentBalance";
 import RequestAndPay from "./components/RequestAndPay";
 import AccountDetails from "./components/AccountDetails";
 import RecentActivity from "./components/RecentActivity";
+import AddFriend from "./components/AddFriend";
 const ABI = require("./abi.json");
 
 const { Header, Content } = Layout;
@@ -34,7 +35,8 @@ function App() {
   const [requests, setRequests] = useState({ 1: [0], 0: [] });
   const [nameModal, setNameModal] = useState(false);
   const [modalName, setModalName] = useState("");
-
+  const [friendModal, setFriendModal] = useState(false);
+  const [friend, setFriend] = useState("");
   function disconnectAndSetNull() {
     disconnect();
     setName("...");
@@ -52,7 +54,17 @@ function App() {
     args: [modalName],
   });
 
-  const { write } = useContractWrite(config);
+  const { write: writeAddName } = useContractWrite(config);
+
+  const { config: addFriendAddress } = usePrepareContractWrite({
+    address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
+    abi: ABI,
+    chainId: polygonMumbai.id,
+    functionName: "addFriend",
+    args: [friend],
+  });
+
+  const { write: writeAddFriend } = useContractWrite(addFriendAddress);
 
   async function getNameAndBalance() {
     const res = await axios.get(`http://localhost:3001/getNameAndBalance`, {
@@ -78,6 +90,14 @@ function App() {
     setModalName("");
   };
 
+  const showAddFriendModal = () => {
+    setFriendModal(true);
+  };
+  const hideAddFriendModal = () => {
+    setFriendModal(false);
+    setFriend("");
+  };
+
   useEffect(() => {
     if (!isConnected) return;
     getNameAndBalance();
@@ -90,26 +110,23 @@ function App() {
           <>
             <UserName
               name={name}
-              address={address}
-              balance={balance}
-              dollars={dollars}
               disconnectAndSetNull={disconnectAndSetNull}
               nameModal={nameModal}
               hideNameModal={hideNameModal}
               modalName={modalName}
               setModalName={setModalName}
               showNameModal={showNameModal}
-              write={write}
+              writeAddName={writeAddName}
             />
           </>
         ) : (
           <>
-          {/* <div>Please Login</div>
+            {/* <div>Please Login</div>
           <ConnectButton connect={connect} /> */}
           </>
         )}
       </>
-      { name ? (
+      {name ? (
         <Layout>
           <Header className="header">
             <div className="headerLeft">
@@ -130,36 +147,47 @@ function App() {
               )}
             </div>
             {isConnected ? (
-              <Button type={"primary"} onClick={disconnectAndSetNull}>
-                Disconnect Wallet
-              </Button>
+              <>
+                <AddFriend
+                  name={name}
+                  friendModal={friendModal}
+                  showAddFriendModal={showAddFriendModal}
+                  hideAddFriendModal={hideAddFriendModal}
+                  writeAddFriend={writeAddFriend}
+                  friend={friend}
+                  setFriend={setFriend}
+                />
+                <Button type={"primary"} onClick={disconnectAndSetNull}>
+                  Disconnect Wallet
+                </Button>
+              </>
             ) : (
               <ConnectButton connect={connect} />
             )}
           </Header>
           <Content className="content">
-                {isConnected ? (
-                  <>
-                    <div className="firstColumn">
-                      <CurrentBalance dollars={dollars} />
-                      <RequestAndPay requests={requests} getNameAndBalance={getNameAndBalance}/>
-                      <AccountDetails
-                        address={address}
-                        name={name}
-                        balance={balance}
-                      />
-                    </div>
-                    <div className="secondColumn">
-                      <RecentActivity history={history} />
-                    </div>
-                  </>
-                ) : (
-                  <div>Please Login</div>
-                )}
-              </Content>
+            {isConnected ? (
+              <>
+                <div className="firstColumn">
+                  <CurrentBalance dollars={dollars} />
+                  <RequestAndPay requests={requests} getNameAndBalance={getNameAndBalance} />
+                  <AccountDetails
+                    address={address}
+                    name={name}
+                    balance={balance}
+                  />
+                </div>
+                <div className="secondColumn">
+                  <RecentActivity history={history} />
+                </div>
+              </>
+            ) : (
+              <div>Please Login</div>
+            )}
+          </Content>
         </Layout>) : (
-        <> 
-        <ConnectButton connect={connect} /> 
+        <>
+          {/* <ConnectButton connect={connect} />  */}
         </>)
       }
 

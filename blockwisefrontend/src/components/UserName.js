@@ -1,31 +1,20 @@
-import {  Button, Modal, Input } from "antd";
+import { Button, Modal, Input } from "antd";
 import { FormOutlined } from "@ant-design/icons";
 import "../App.css";
 const UserName = ({
   name,
-  address,
-  balance,
-  dollars,
   disconnectAndSetNull,
   nameModal,
   hideNameModal,
   modalName,
   setModalName,
   showNameModal,
-  write,
+  writeAddName,
 }) => {
   return (
     <>
-      {/* <h5>Connected Wallet: {address}</h5> */}
-
       {name ? (
         <>
-          {/* <p>(Name : {name})</p>
-          {balance && <p>(polygon balance: {balance})</p>}
-          {dollars && <p>(polygon balance in USD: {dollars})</p>}
-          <Button type={"primary"} onClick={disconnectAndSetNull}>
-            Disconnect Wallet
-          </Button> */}
         </>
       ) : (
         <>
@@ -34,7 +23,7 @@ const UserName = ({
             open={nameModal}
             onCancel={hideNameModal}
             onOk={() => {
-              write();
+              writeAddName();
               hideNameModal();
             }}
             okText="Set UserName"
@@ -61,6 +50,9 @@ const UserName = ({
               set username
             </Button>
           </div>
+          <Button type={"primary"} onClick={disconnectAndSetNull}>
+            Disconnect Wallet
+          </Button>
         </>
       )}
     </>
