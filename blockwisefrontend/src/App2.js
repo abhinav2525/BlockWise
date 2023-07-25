@@ -1,16 +1,23 @@
 import { useState, useEffect } from "react";
+import "./App.css";
 import { useConnect, useAccount, useDisconnect } from "wagmi";
+import { Layout, Button } from "antd";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import {
   usePrepareContractWrite,
   useContractWrite,
-  useWaitForTransaction,
 } from "wagmi";
 import { polygonMumbai } from "@wagmi/chains";
 import axios from "axios";
 import ConnectButton from "./components/ConnectButton";
 import UserName from "./components/UserName";
+import CurrentBalance from "./components/CurrentBalance";
+import RequestAndPay from "./components/RequestAndPay";
+import AccountDetails from "./components/AccountDetails";
+import RecentActivity from "./components/RecentActivity";
 const ABI = require("./abi.json");
+
+const { Header, Content } = Layout;
 
 function App() {
   const { address, isConnected } = useAccount();
@@ -37,7 +44,7 @@ function App() {
     setRequests({ 1: [0], 0: [] });
   }
 
-  const { config, error } = usePrepareContractWrite({
+  const { config } = usePrepareContractWrite({
     address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
     abi: ABI,
     chainId: polygonMumbai.id,
@@ -45,7 +52,7 @@ function App() {
     args: [modalName],
   });
 
-  const { write, data, isLoading, isSuccess } = useContractWrite(config);
+  const { write } = useContractWrite(config);
 
   async function getNameAndBalance() {
     const res = await axios.get(`http://localhost:3001/getNameAndBalance`, {
@@ -96,9 +103,66 @@ function App() {
             />
           </>
         ) : (
-          <ConnectButton connect={connect} />
+          <>
+          {/* <div>Please Login</div>
+          <ConnectButton connect={connect} /> */}
+          </>
         )}
       </>
+      { name ? (
+        <Layout>
+          <Header className="header">
+            <div className="headerLeft">
+              {/* <img src={logo} alt="logo" className="logo" /> */}
+              {isConnected && (
+                <>
+                  <div
+                    className="menuOption"
+                    style={{ borderBottom: "1.5px solid black" }}
+                  >
+                    Summary
+                  </div>
+                  <div className="menuOption">Activity</div>
+                  <div className="menuOption">{`Send & Request`}</div>
+                  <div className="menuOption">Wallet</div>
+                  <div className="menuOption">Help</div>
+                </>
+              )}
+            </div>
+            {isConnected ? (
+              <Button type={"primary"} onClick={disconnectAndSetNull}>
+                Disconnect Wallet
+              </Button>
+            ) : (
+              <ConnectButton connect={connect} />
+            )}
+          </Header>
+          <Content className="content">
+                {isConnected ? (
+                  <>
+                    <div className="firstColumn">
+                      <CurrentBalance dollars={dollars} />
+                      <RequestAndPay requests={requests} getNameAndBalance={getNameAndBalance}/>
+                      <AccountDetails
+                        address={address}
+                        name={name}
+                        balance={balance}
+                      />
+                    </div>
+                    <div className="secondColumn">
+                      <RecentActivity history={history} />
+                    </div>
+                  </>
+                ) : (
+                  <div>Please Login</div>
+                )}
+              </Content>
+        </Layout>) : (
+        <> 
+        <ConnectButton connect={connect} /> 
+        </>)
+      }
+
     </div>
   );
 }

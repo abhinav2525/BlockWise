@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
-import { createConfig, configureChains, createClient, WagmiConfig, mainnet } from 'wagmi';
+import App from './App2';
+import { configureChains, createClient, WagmiConfig, mainnet } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 import { polygonMumbai } from 'wagmi/chains';
 

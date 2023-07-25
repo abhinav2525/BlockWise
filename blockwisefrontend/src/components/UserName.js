@@ -1,7 +1,7 @@
-import { Layout, Button, Modal, Input, InputNumber } from "antd";
-import { DollarOutlined, FormOutlined } from "@ant-design/icons";
-
-const ProfileInfo = ({
+import {  Button, Modal, Input } from "antd";
+import { FormOutlined } from "@ant-design/icons";
+import "../App.css";
+const UserName = ({
   name,
   address,
   balance,
@@ -16,16 +16,16 @@ const ProfileInfo = ({
 }) => {
   return (
     <>
-      <h5>Connected Wallet: {address}</h5>
+      {/* <h5>Connected Wallet: {address}</h5> */}
 
       {name ? (
         <>
-          <p>(Name : {name})</p>
+          {/* <p>(Name : {name})</p>
           {balance && <p>(polygon balance: {balance})</p>}
           {dollars && <p>(polygon balance in USD: {dollars})</p>}
           <Button type={"primary"} onClick={disconnectAndSetNull}>
             Disconnect Wallet
-          </Button>
+          </Button> */}
         </>
       ) : (
         <>
@@ -48,7 +48,6 @@ const ProfileInfo = ({
                 setModalName(val.target.value);
               }}
             />
-            {/* <Input placeholder="Enter the user name" onChange={changeReceiver} /> */}
           </Modal>
           <div>
             <Button
@@ -68,4 +67,4 @@ const ProfileInfo = ({
   );
 };
 
-export default ProfileInfo;
+export default UserName;
