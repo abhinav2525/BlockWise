@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-// import matic from "../matic.png";
+import matic from "../matic.png";
 
 
 function AccountDetails({ address, name, balance }) {
@@ -20,7 +20,7 @@ function AccountDetails({ address, name, balance }) {
         </div>
       </div>
       <div className="accountDetailRow">
-        {/* <img src={matic} alt="maticLogo" width={25} /> */}
+        <img src={matic} alt="maticLogo" width={25} />
         <div>
           <div className="accountDetailHead"> Native Matic Tokens</div>
           <div className="accountDetailBody">{balance} Matic</div>
