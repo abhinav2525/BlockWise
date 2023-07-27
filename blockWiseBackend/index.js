@@ -15,20 +15,33 @@ app.get("/", (req, res) => {
   res.send("<h1> Hello from blockWise Backend APIs</h1>");
 });
 
-// app.get("/getMyHistory", async (req, res)=> {
-//   const { userAddress } = req.query;
+app.get("/getFriends", async (req, res) => {
+  const { userAddress } = req.query;
 
-//   const fourResponse = await Moralis.EvmApi.utils.runContractFunction({
-//     chain: "0x13881",
-//     address: process.env.BLOCKWISE_ADDRESS,
-//     functionName: "getMyHistory",
-//     abi: ABI,
-//     params: { _user: userAddress },
-//   });
+  const sixResponse = await Moralis.EvmApi.utils.runContractFunction({
+    chain: "0x13881",
+    address: process.env.BLOCKWISE_ADDRESS,
+    functionName: "getAllFriends",
+    abi: ABI,
+    params: { _user: userAddress },
+  });
 
-//   return res.status(200).send(fourResponse);
+  return res.status(200).send(sixResponse);
 
-// })
+})
+
+app.get("/getMyHistory", async (req, res) => {
+  const { userAddress } = req.query;
+  const history = await Moralis.EvmApi.utils.runContractFunction({
+    chain: "0x13881",
+    address: process.env.BLOCKWISE_ADDRESS,
+    functionName: "getMyHistory",
+    abi: ABI,
+    params: { _user: userAddress },
+  });
+  return res.status(200).send(history);
+
+})
 
 // app.get("/getMyName", async (req,res)=> {
 //   const { userAddress } = req.query;
@@ -88,11 +101,27 @@ function convertArrayToObjects(arr) {
     type: transaction[0],
     amount: transaction[1],
     message: transaction[2],
-    address: `${transaction[3].slice(0,4)}...${transaction[3].slice(0,4)}`,
+    address: `${transaction[3].slice(0, 4)}...${transaction[3].slice(0, 4)}`,
     subject: transaction[4],
+    time: transaction[5],
   }));
 
   return dataArray.reverse();
+}
+
+function transformData(input) {
+  const names = input["0"];
+  const addresses = input["1"];
+  let output = [];
+
+  for (let i = 0; i < names.length; i++) {
+    output.push({
+      name: names[i],
+      address: addresses[i]
+    });
+  }
+
+  return output;
 }
 
 app.get("/getNameAndBalance", async (req, res) => {
@@ -144,6 +173,15 @@ app.get("/getNameAndBalance", async (req, res) => {
 
   const jsonResponseRequests = fiveResponse.raw;
 
+  const sixResponse = await Moralis.EvmApi.utils.runContractFunction({
+    chain: "0x13881",
+    address: process.env.BLOCKWISE_ADDRESS,
+    functionName: "getAllFriends",
+    abi: ABI,
+    params: { _user: userAddress },
+  });
+
+  const jsonResponseFriends = transformData(sixResponse.raw)
 
   const jsonResponse = {
     name: jsonResponseName,
@@ -151,6 +189,7 @@ app.get("/getNameAndBalance", async (req, res) => {
     dollars: jsonResponseDollars,
     history: jsonResponseHistory,
     requests: jsonResponseRequests,
+    friends: jsonResponseFriends,
   };
 
   return res.status(200).json(jsonResponse);
