@@ -20,7 +20,7 @@ const AddFriend = ({
                         open={friendModal}
                         onCancel={hideAddFriendModal}
                         onOk={() => {
-                            writeAddFriend?.();
+                            writeAddFriend();
                             hideAddFriendModal();
                         }}
                         okText="AddFriend"

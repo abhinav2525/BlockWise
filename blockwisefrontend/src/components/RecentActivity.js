@@ -103,12 +103,28 @@ const columns = [
       </div>
     ),
   },
+  {
+    title:"Date",
+    dataIndex: "time",
+    render:(_,row)=>{
+      return new Intl.DateTimeFormat('en-US',{ dateStyle:'medium'}).format(new Date(_*1000),{})
+    },
+    key:"time",
+  },
+  {
+    title:"Time",
+    dataIndex: "time",
+    render:(_,row)=>{
+      return new Intl.DateTimeFormat('en-US',{timeStyle:'medium'}).format(new Date(_*1000),{})
+    },
+    key:"time",
+  }
 ];
 
 function RecentActivity({ history }) {
 
   return (
-    <Card title="Recent Activity" style={{ width: "100%", minHeight: "663px" }}>
+    <Card title="Recent Activity" style={{ width: "100%", minHeight: "850px" }}>
       {history && 
       <Table
         dataSource={history}

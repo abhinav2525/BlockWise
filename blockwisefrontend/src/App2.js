@@ -16,6 +16,7 @@ import RequestAndPay from "./components/RequestAndPay";
 import AccountDetails from "./components/AccountDetails";
 import RecentActivity from "./components/RecentActivity";
 import AddFriend from "./components/AddFriend";
+import LandingPage from "./components/LandingPage";
 const ABI = require("./abi.json");
 
 const { Header, Content } = Layout;
@@ -33,10 +34,16 @@ function App() {
   const [dollars, setDollars] = useState("...");
   const [history, setHistory] = useState(null);
   const [requests, setRequests] = useState({ 1: [0], 0: [] });
+
+
   const [nameModal, setNameModal] = useState(false);
   const [modalName, setModalName] = useState("");
+
+
   const [friendModal, setFriendModal] = useState(false);
   const [friend, setFriend] = useState("");
+
+
   function disconnectAndSetNull() {
     disconnect();
     setName("...");
@@ -126,7 +133,7 @@ function App() {
           </>
         )}
       </>
-      {name ? (
+      {name && isConnected? (
         <Layout>
           <Header className="header">
             <div className="headerLeft">
@@ -148,6 +155,7 @@ function App() {
             </div>
             {isConnected ? (
               <>
+
                 <AddFriend
                   name={name}
                   friendModal={friendModal}
@@ -162,7 +170,8 @@ function App() {
                 </Button>
               </>
             ) : (
-              <ConnectButton connect={connect} />
+              <></>
+              // <ConnectButton connect={connect} />
             )}
           </Header>
           <Content className="content">
@@ -182,12 +191,16 @@ function App() {
                 </div>
               </>
             ) : (
-              <div>Please Login</div>
+              <>
+              {/* <div>Please Login</div> */}
+              {/* <LandingPage /> */}
+              </>
             )}
           </Content>
         </Layout>) : (
         <>
           {/* <ConnectButton connect={connect} />  */}
+          <LandingPage />
         </>)
       }
 
