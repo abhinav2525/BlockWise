@@ -12,7 +12,7 @@ const LandingPage = () => {
   });
   return (
     <div>
-      <ConnectButton connect={connect} cl/>
+      <ConnectButton connect={connect} />
     </div>
   );
 };

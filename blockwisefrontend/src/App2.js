@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import { useConnect, useAccount, useDisconnect } from "wagmi";
-import { Layout, Button } from "antd";
+import { Layout, Button, Alert, Space, notification } from "antd";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import {
   usePrepareContractWrite,
-  useContractWrite,
+  useContractWrite, useWaitForTransaction
 } from "wagmi";
 import { polygonMumbai } from "@wagmi/chains";
 import axios from "axios";
-import ConnectButton from "./components/ConnectButton";
+// import ConnectButton from "./components/ConnectButton";
 import UserName from "./components/UserName";
 import CurrentBalance from "./components/CurrentBalance";
 import RequestAndPay from "./components/RequestAndPay";
@@ -25,14 +25,15 @@ function App() {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
 
-  const { connect } = useConnect({
-    connector: new MetaMaskConnector(),
-  });
+  // const { connect } = useConnect({
+  //   connector: new MetaMaskConnector(),
+  // });
 
   const [name, setName] = useState("...");
   const [balance, setBalance] = useState("...");
   const [dollars, setDollars] = useState("...");
   const [history, setHistory] = useState(null);
+  const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState({ 1: [0], 0: [] });
 
 
@@ -43,7 +44,6 @@ function App() {
   const [friendModal, setFriendModal] = useState(false);
   const [friend, setFriend] = useState("");
 
-
   function disconnectAndSetNull() {
     disconnect();
     setName("...");
@@ -51,6 +51,7 @@ function App() {
     setDollars("...");
     setHistory(null);
     setRequests({ 1: [0], 0: [] });
+    setFriends([]);
   }
 
   const { config } = usePrepareContractWrite({
@@ -61,7 +62,11 @@ function App() {
     args: [modalName],
   });
 
-  const { write: writeAddName } = useContractWrite(config);
+  const { write: writeAddName, data: addNameData } = useContractWrite(config);
+
+  const { isSuccess } = useWaitForTransaction({
+    hash: addNameData?.hash,
+  })
 
   const { config: addFriendAddress } = usePrepareContractWrite({
     address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
@@ -69,6 +74,15 @@ function App() {
     chainId: polygonMumbai.id,
     functionName: "addFriend",
     args: [friend],
+    onError(error) {
+      console.log('error', error.reason)
+      if(error.reason === 'resolver or addr is not configured for ENS name'|| error.reason === 'error network does not support ENS'){
+        return;
+      }
+     notification.error({
+      description: error.reason
+     })
+    },
   });
 
   const { write: writeAddFriend } = useContractWrite(addFriendAddress);
@@ -87,6 +101,7 @@ function App() {
     setDollars(String(response.dollars));
     setHistory(response.history);
     setRequests(response.requests);
+    setFriends(response.friends);
   }
 
   const showNameModal = () => {
@@ -108,103 +123,123 @@ function App() {
   useEffect(() => {
     if (!isConnected) return;
     getNameAndBalance();
-  }, [isConnected, address]);
+  }, [isConnected, address, setFriend, isSuccess]);
 
   return (
-    <div className="App">
-      <>
-        {isConnected ? (
+    <>
+      <Space direction="vertical" style={{ width: '100%' }}>
+        <div className="App">
+
           <>
-            <UserName
-              name={name}
-              disconnectAndSetNull={disconnectAndSetNull}
-              nameModal={nameModal}
-              hideNameModal={hideNameModal}
-              modalName={modalName}
-              setModalName={setModalName}
-              showNameModal={showNameModal}
-              writeAddName={writeAddName}
-            />
-          </>
-        ) : (
-          <>
-            {/* <div>Please Login</div>
-          <ConnectButton connect={connect} /> */}
-          </>
-        )}
-      </>
-      {name && isConnected? (
-        <Layout>
-          <Header className="header">
-            <div className="headerLeft">
-              {/* <img src={logo} alt="logo" className="logo" /> */}
-              {isConnected && (
-                <>
-                  <div
-                    className="menuOption"
-                    style={{ borderBottom: "1.5px solid black" }}
-                  >
-                    Summary
-                  </div>
-                  <div className="menuOption">Activity</div>
-                  <div className="menuOption">{`Send & Request`}</div>
-                  <div className="menuOption">Wallet</div>
-                  <div className="menuOption">Help</div>
-                </>
-              )}
-            </div>
+
             {isConnected ? (
               <>
-
-                <AddFriend
+                <UserName
                   name={name}
-                  friendModal={friendModal}
-                  showAddFriendModal={showAddFriendModal}
-                  hideAddFriendModal={hideAddFriendModal}
-                  writeAddFriend={writeAddFriend}
-                  friend={friend}
-                  setFriend={setFriend}
+                  disconnectAndSetNull={disconnectAndSetNull}
+                  nameModal={nameModal}
+                  hideNameModal={hideNameModal}
+                  modalName={modalName}
+                  setModalName={setModalName}
+                  showNameModal={showNameModal}
+                  writeAddName={writeAddName}
                 />
-                <Button type={"primary"} onClick={disconnectAndSetNull}>
-                  Disconnect Wallet
-                </Button>
-              </>
-            ) : (
-              <></>
-              // <ConnectButton connect={connect} />
-            )}
-          </Header>
-          <Content className="content">
-            {isConnected ? (
-              <>
-                <div className="firstColumn">
-                  <CurrentBalance dollars={dollars} />
-                  <RequestAndPay requests={requests} getNameAndBalance={getNameAndBalance} />
-                  <AccountDetails
-                    address={address}
-                    name={name}
-                    balance={balance}
-                  />
-                </div>
-                <div className="secondColumn">
-                  <RecentActivity history={history} />
-                </div>
               </>
             ) : (
               <>
-              {/* <div>Please Login</div> */}
-              {/* <LandingPage /> */}
+                {/* <div>Please Login</div>
+          <ConnectButton connect={connect} /> */}
               </>
             )}
-          </Content>
-        </Layout>) : (
-        <>
-          {/* <ConnectButton connect={connect} />  */}
-          <LandingPage />
-        </>)
-      }
+          </>
+          {name && isConnected ? (
+            <Layout>
+              <Header className="header">
+                <div className="headerLeft">
+                  {/* <img src={logo} alt="logo" className="logo" /> */}
+                  {isConnected && (
+                    <>
+                      <div
+                        className="menuOption"
+                        style={{ borderBottom: "1.5px solid black" }}
+                      >
+                        Summary
+                      </div>
+                      <div className="menuOption">Activity</div>
+                      <div className="menuOption">{`Send & Request`}</div>
+                      <div className="menuOption">Wallet</div>
+                      <div className="menuOption">Help</div>
+                    </>
+                  )}
+                </div>
+                {isConnected ? (
+                  <>
 
-    </div>
+                    <AddFriend
+                      name={name}
+                      friendModal={friendModal}
+                      showAddFriendModal={showAddFriendModal}
+                      hideAddFriendModal={hideAddFriendModal}
+                      writeAddFriend={
+                        writeAddFriend
+                      }
+                      friend={friend}
+                      setFriend={setFriend}
+                    />
+                    {/* <ShowFriends 
+                name={name} 
+                showFriends={showFriends}
+                disconnectAndSetNull={disconnectAndSetNull}
+                /> */}
+                    <Button type={"primary"} onClick={disconnectAndSetNull}>
+                      Disconnect Wallet
+                    </Button>
+                  </>
+                ) : (
+                  <></>
+                  // <ConnectButton connect={connect} />
+                )}
+              </Header>
+             
+              <Content className="content">
+                {isConnected ? (
+                  <>
+                    <div className="firstColumn">
+                      <CurrentBalance dollars={dollars} />
+                      <RequestAndPay requests={requests} getNameAndBalance={getNameAndBalance} friends={friends}/>
+                      <AccountDetails
+                        address={address}
+                        name={name}
+                        balance={balance}
+                      />
+
+                    </div>
+                    <div className="secondColumn">
+                      <RecentActivity history={history} />
+                    </div>
+                  </>
+
+                ) : (
+                  <>
+                    {/* <div>Please Login</div> */}
+                    {/* <LandingPage /> */}
+                  </>
+                )}
+              </Content>
+            </Layout>
+          )
+            : (
+              <>
+                {/* <ConnectButton connect={connect} />  */}
+                <LandingPage />
+              </>)
+          }
+        </div>
+        <>
+
+        </>
+      </Space>
+    </>
   );
 }
 

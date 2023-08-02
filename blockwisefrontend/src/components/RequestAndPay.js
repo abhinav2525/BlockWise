@@ -1,16 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { DollarOutlined, SwapOutlined } from "@ant-design/icons";
-import { Modal, Input, InputNumber } from "antd";
+import { DollarOutlined, SwapOutlined, UsergroupAddOutlined } from "@ant-design/icons";
+import { Modal, Input, InputNumber,Select, Space } from "antd";
 import { usePrepareContractWrite, useContractWrite, useWaitForTransaction  } from "wagmi";
 import { polygonMumbai } from "@wagmi/chains";
 import ABI from "../abi.json";
 
-function RequestAndPay({ requests, getNameAndBalance }) {
+
+function RequestAndPay({ requests, getNameAndBalance, friends }) {
   const [payModal, setPayModal] = useState(false);
   const [requestModal, setRequestModal] = useState(false);
+  const [groupRequestModel, setGroupRequestModel] = useState(false);
+  // const [groupRequestAmount, setGroupRequestAmount] = useState(6);
+  const [requestGroupAddress, setRequestGroupAddress] = useState([]);
   const [requestAmount, setRequestAmount] = useState(5);
   const [requestAddress, setRequestAddress] = useState("");
   const [requestMessage, setRequestMessage] = useState("");
+
+
+
+  const friendsOptions = friends.map(friend => ({
+    label: friend.name,
+    value: friend.address,
+  }));
+
+  console.log(friendsOptions);
+
+  const handleFriendSelect = (value) => {
+    setRequestGroupAddress(value);
+  };
 
   const { config } = usePrepareContractWrite({
     chainId: polygonMumbai.id,
@@ -26,7 +43,7 @@ function RequestAndPay({ requests, getNameAndBalance }) {
   const { write, data } = useContractWrite(config);
 
   const { config: configRequest } = usePrepareContractWrite({
-    chainId: 80001,
+    chainId: polygonMumbai.id,
     address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
     abi: ABI,
     functionName: "createRequest",
@@ -35,6 +52,15 @@ function RequestAndPay({ requests, getNameAndBalance }) {
 
   const { write: writeRequest, data: dataRequest } = useContractWrite(configRequest);
 
+  const { config: configGroupRequest } = usePrepareContractWrite({
+    chainId: polygonMumbai.id,
+    address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
+    abi: ABI,
+    functionName: "createGroupRequest",
+    args: [requestAmount, requestMessage, requestGroupAddress],
+  });
+
+  const { write: groupRequest, data: groupRequestData } = useContractWrite(configGroupRequest);
 
   const { isSuccess } = useWaitForTransaction({
     hash: data?.hash,
@@ -59,10 +85,19 @@ function RequestAndPay({ requests, getNameAndBalance }) {
     setRequestModal(false);
   };
 
+  const showGroupRequestModel = () => {
+    setGroupRequestModel(true);
+  }
+
+  const hideGroupRequestModel = () => {
+    setGroupRequestModel(false);
+  }
+
   useEffect(()=>{
     if(isSuccess || isSuccessRequest){
       getNameAndBalance();
     }
+    console.log(setRequestGroupAddress);
   },[isSuccess, isSuccessRequest])
 
   return (
@@ -104,6 +139,42 @@ function RequestAndPay({ requests, getNameAndBalance }) {
         <p>Message</p>
         <Input placeholder="Lunch Bill..." value={requestMessage} onChange={(val)=>setRequestMessage(val.target.value)}/>
       </Modal>
+
+      <Modal
+        title="Group request"
+        open={groupRequestModel}
+        onOk={() => {
+          groupRequest?.();
+          hideGroupRequestModel();
+        }}
+        onCancel={hideGroupRequestModel}
+        okText="Proceed To Request"
+        cancelText="Cancel"
+      >
+        <p>Amount (Matic)</p>
+        <InputNumber value={requestAmount} onChange={(val) => setRequestAmount(val)} />
+        <p>Add people</p>
+        <Space
+          style={{
+            width: '100%',
+          }}
+          direction="vertical"
+        >
+          <Select
+            mode="multiple"
+            allowClear
+            style={{
+              width: '100%',
+            }}
+            placeholder="Please select your friends for the split"
+            onChange={handleFriendSelect}
+            options={friendsOptions}
+          />
+        </Space>
+        <p>Message</p>
+        <Input placeholder="description" value={requestMessage} onChange={(val) => setRequestMessage(val.target.value)} />
+      </Modal>
+      
       <div className="requestAndPay">
         <div
           className="quickOption"
@@ -125,6 +196,15 @@ function RequestAndPay({ requests, getNameAndBalance }) {
         >
           <SwapOutlined style={{ fontSize: "26px" }} />
           Request
+        </div>
+        <div
+          className="quickOption"
+          onClick={()=>{
+            showGroupRequestModel();
+          }}
+        >
+          <UsergroupAddOutlined style={{ fontSize: "26px" }}/>
+          Grp Req
         </div>
       </div>
     </>

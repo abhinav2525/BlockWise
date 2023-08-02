@@ -38,7 +38,7 @@
   justify-content: center;
   align-items: flex-start; 
   gap: 20px;
-  background-color: black;
+  background-color: whitesmoke;
 }
 
 .firstColumn {
@@ -96,8 +96,8 @@
 
 .quickOption {
   background-color: #31579E;
-  height:100px;
-  width: 100px;
+  height:80px;
+  width: 80px;
   border-radius: 10px;
   color: white;
   font-weight: bold;

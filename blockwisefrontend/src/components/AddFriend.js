@@ -1,6 +1,7 @@
-import { Button, Modal, Input } from "antd";
+import { Button, Modal, Input, notification } from "antd";
 import { UserAddOutlined } from "@ant-design/icons";
 import "../App.css";
+import { useRef, useState } from "react";
 const AddFriend = ({
     name,
     friendModal,
@@ -10,6 +11,8 @@ const AddFriend = ({
     friend,
     setFriend,
 }) => {
+    const [add,setAdd] = useState("")
+    const inputRef = useRef(null);
     return (
         <>
             {name ? (
@@ -20,7 +23,14 @@ const AddFriend = ({
                         open={friendModal}
                         onCancel={hideAddFriendModal}
                         onOk={() => {
-                            writeAddFriend();
+                            if(!add){
+                                notification.error({
+                                    description:"Please enter the proper address"
+                                })
+                                inputRef.current.focus()
+                                    return;
+                            }
+                            writeAddFriend?.();
                             hideAddFriendModal();
                         }}
                         okText="AddFriend"
@@ -32,12 +42,13 @@ const AddFriend = ({
                             onChange={(val) => {
                                 setFriend(val.target.value);
                             }}
+                            autoFocus
+                            ref={inputRef}
                         />
                     </Modal>
                     <div>
                         <Button
                             type={"primary"}
-                            className="quickOption"
                             onClick={() => {
                                 showAddFriendModal();
                             }}

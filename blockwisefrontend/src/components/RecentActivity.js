@@ -1,6 +1,18 @@
 import React from "react";
-import { Card, Table } from "antd";
+import { Card, Table, Avatar } from "antd";
 
+
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+
+window.colorHash = {}
 
 const dataSource = [
   {
@@ -74,6 +86,19 @@ const columns = [
     title: "Payment Subjet",
     dataIndex: "subject",
     key: "subject",
+    render:(subject,row)=>{
+      let color = subject;
+      
+      if(window.colorHash[subject]){
+        color = window.colorHash[subject]
+      }else{
+        window.colorHash[subject] = getRandomColor()
+      }
+      color = window.colorHash[subject]
+      return <> <Avatar  style={{
+        background: color
+      }}>{subject[0]}</Avatar> {subject}</>
+    }
   },
   {
     title: "Type",

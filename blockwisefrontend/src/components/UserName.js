@@ -23,7 +23,7 @@ const UserName = ({
             open={nameModal}
             onCancel={hideNameModal}
             onOk={() => {
-              writeAddName();
+              writeAddName?.();
               hideNameModal();
             }}
             okText="Set UserName"

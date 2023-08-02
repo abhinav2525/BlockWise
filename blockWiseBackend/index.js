@@ -43,56 +43,18 @@ app.get("/getMyHistory", async (req, res) => {
 
 })
 
-// app.get("/getMyName", async (req,res)=> {
-//   const { userAddress } = req.query;
-//   const response = await Moralis.EvmApi.utils.runContractFunction({
-//     chain: "0x13881",
-//     address: process.env.BLOCKWISE_ADDRESS,
-//     functionName: "getMyName",
-//     abi: ABI,
-//     params: { _user: userAddress },
-//   });
+app.get("/getMyFriends", async (req, res) => {
+  const { userAddress } = req.query;
+  const friends = await Moralis.EvmApi.utils.runContractFunction({
+    chain: "0x13881",
+    address: process.env.BLOCKWISE_ADDRESS,
+    functionName: "getAllFriends",
+    abi: ABI,
+    params: { _user: userAddress },
+  });
+  return res.status(200).send({"friends":transformData(friends.raw)});
 
-//   const jsonResponseName = response.raw;
-
-//   return res.status(200).send(jsonResponseName);
-
-// })
-
-// app.get("/getBalanceInUSD", async (req,res)=> {
-//   const { userAddress } = req.query;
-//   const secResponse = await Moralis.EvmApi.balance.getNativeBalance({
-//     chain: "0x13881",
-//     address: userAddress,
-//   });
-
-//   const jsonResponseBal = (secResponse.raw.balance / 1e18).toFixed(2);
-
-//   const thirResponse = await Moralis.EvmApi.token.getTokenPrice({
-//     address: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
-//   });
-
-//   const jsonResponseDollars = (
-//     thirResponse.raw.usdPrice * jsonResponseBal
-//   ).toFixed(2);
-
-//   return res.status(200).send(jsonResponseDollars);
-// })
-
-// app.get("/getMyRequest", async (req,res)=>{
-//   const { userAddress } = req.query;
-//   const fiveResponse = await Moralis.EvmApi.utils.runContractFunction({
-//     chain: "0x13881",
-//     address: process.env.BLOCKWISE_ADDRESS,
-//     functionName: "getMyRequests",
-//     abi: ABI,
-//     params: { _user: userAddress },
-//   });
-
-//   const jsonResponseRequests = fiveResponse.raw;
-//   return res.status(200).send(jsonResponseRequests);
-
-// })
+})
 
 
 function convertArrayToObjects(arr) {
@@ -207,4 +169,3 @@ const startServer = async () => {
 };
 
 startServer();
-
