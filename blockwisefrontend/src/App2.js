@@ -17,6 +17,7 @@ import AccountDetails from "./components/AccountDetails";
 import RecentActivity from "./components/RecentActivity";
 import AddFriend from "./components/AddFriend";
 import LandingPage from "./components/LandingPage";
+import ShowFriendsButton from "./components/ShowFriendsButton";
 const ABI = require("./abi.json");
 
 const { Header, Content } = Layout;
@@ -180,17 +181,14 @@ function App() {
                       friendModal={friendModal}
                       showAddFriendModal={showAddFriendModal}
                       hideAddFriendModal={hideAddFriendModal}
-                      writeAddFriend={
-                        writeAddFriend
-                      }
+                      writeAddFriend={writeAddFriend}
                       friend={friend}
                       setFriend={setFriend}
                     />
-                    {/* <ShowFriends 
-                name={name} 
-                showFriends={showFriends}
-                disconnectAndSetNull={disconnectAndSetNull}
-                /> */}
+                    <ShowFriendsButton
+                      name={name}
+                      friends={friends}
+                    />
                     <Button type={"primary"} onClick={disconnectAndSetNull}>
                       Disconnect Wallet
                     </Button>

@@ -23,7 +23,6 @@ function RequestAndPay({ requests, getNameAndBalance, friends }) {
     value: friend.address,
   }));
 
-  console.log(friendsOptions);
 
   const handleFriendSelect = (value) => {
     setRequestGroupAddress(value);

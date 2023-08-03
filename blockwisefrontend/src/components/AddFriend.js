@@ -1,7 +1,7 @@
 import { Button, Modal, Input, notification } from "antd";
 import { UserAddOutlined } from "@ant-design/icons";
 import "../App.css";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 const AddFriend = ({
     name,
     friendModal,
@@ -11,7 +11,6 @@ const AddFriend = ({
     friend,
     setFriend,
 }) => {
-    const [add,setAdd] = useState("")
     const inputRef = useRef(null);
     return (
         <>
@@ -23,7 +22,7 @@ const AddFriend = ({
                         open={friendModal}
                         onCancel={hideAddFriendModal}
                         onOk={() => {
-                            if(!add){
+                            if(!friend){
                                 notification.error({
                                     description:"Please enter the proper address"
                                 })
