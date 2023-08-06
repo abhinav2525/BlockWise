@@ -36,6 +36,7 @@ function App() {
   const [history, setHistory] = useState(null);
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState({ 1: [0], 0: [] });
+  const [groupReqAcpt,setGroupReqAcpt] = useState('');
 
 
   const [nameModal, setNameModal] = useState(false);
@@ -53,6 +54,7 @@ function App() {
     setHistory(null);
     setRequests({ 1: [0], 0: [] });
     setFriends([]);
+    setGroupReqAcpt("...");
   }
 
   const { config } = usePrepareContractWrite({
@@ -76,7 +78,7 @@ function App() {
     functionName: "addFriend",
     args: [friend],
     onError(error) {
-      console.log('error', error.reason)
+      // console.log('error', error.reason)
       if(error.reason === 'resolver or addr is not configured for ENS name'|| error.reason === 'error network does not support ENS'){
         return;
       }
@@ -103,7 +105,10 @@ function App() {
     setHistory(response.history);
     setRequests(response.requests);
     setFriends(response.friends);
+    setGroupReqAcpt(response.groupRequest);
   }
+
+  // useEffect(() => console.log(groupReqAcpt))
 
   const showNameModal = () => {
     setNameModal(true);
@@ -204,7 +209,7 @@ function App() {
                   <>
                     <div className="firstColumn">
                       <CurrentBalance dollars={dollars} />
-                      <RequestAndPay requests={requests} getNameAndBalance={getNameAndBalance} friends={friends}/>
+                      <RequestAndPay requests={requests} getNameAndBalance={getNameAndBalance} friends={friends} groupReqAcpt={groupReqAcpt}/>
                       <AccountDetails
                         address={address}
                         name={name}
