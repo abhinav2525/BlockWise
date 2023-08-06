@@ -15,13 +15,13 @@ app.get("/", (req, res) => {
   res.send("<h1> Hello from blockWise Backend APIs</h1>");
 });
 
-app.get("/getFriends", async (req, res) => {
+app.get("/getGroupRequestMetasIfParticipant", async (req, res) => {
   const { userAddress } = req.query;
 
   const sixResponse = await Moralis.EvmApi.utils.runContractFunction({
     chain: "0x13881",
     address: process.env.BLOCKWISE_ADDRESS,
-    functionName: "getAllFriends",
+    functionName: "getGroupRequestMetasIfParticipant",
     abi: ABI,
     params: { _user: userAddress },
   });
@@ -30,31 +30,25 @@ app.get("/getFriends", async (req, res) => {
 
 })
 
-app.get("/getMyHistory", async (req, res) => {
-  const { userAddress } = req.query;
-  const history = await Moralis.EvmApi.utils.runContractFunction({
-    chain: "0x13881",
-    address: process.env.BLOCKWISE_ADDRESS,
-    functionName: "getMyHistory",
-    abi: ABI,
-    params: { _user: userAddress },
-  });
-  return res.status(200).send(history);
+function transformMetaData(data) {
+  let output = [];
 
-})
+  // Assuming all inner arrays are of the same length
+  const length = data["0"].length;
 
-app.get("/getMyFriends", async (req, res) => {
-  const { userAddress } = req.query;
-  const friends = await Moralis.EvmApi.utils.runContractFunction({
-    chain: "0x13881",
-    address: process.env.BLOCKWISE_ADDRESS,
-    functionName: "getAllFriends",
-    abi: ABI,
-    params: { _user: userAddress },
-  });
-  return res.status(200).send({"friends":transformData(friends.raw)});
+  for(let i = 0; i < length; i++) {
+    let item = {
+      address: data["0"][i],
+      name: data["1"][i],
+      requestID: parseInt(data["2"][i], 10),
+      description: data["3"][i],
+      timestamp: data["4"][i]
+    };
+    output.push(item);
+  }
 
-})
+  return output;
+}
 
 
 function convertArrayToObjects(arr) {
@@ -145,6 +139,16 @@ app.get("/getNameAndBalance", async (req, res) => {
 
   const jsonResponseFriends = transformData(sixResponse.raw)
 
+  const sevenResponce = await Moralis.EvmApi.utils.runContractFunction({
+    chain: "0x13881",
+    address: process.env.BLOCKWISE_ADDRESS,
+    functionName:"getGroupRequestMetasIfParticipant",
+    abi:ABI,
+    params: {_user:userAddress},
+  })
+
+  const jsonResponceMeta = transformMetaData(sevenResponce.raw)
+
   const jsonResponse = {
     name: jsonResponseName,
     balance: jsonResponseBal,
@@ -152,6 +156,7 @@ app.get("/getNameAndBalance", async (req, res) => {
     history: jsonResponseHistory,
     requests: jsonResponseRequests,
     friends: jsonResponseFriends,
+    groupRequest: jsonResponceMeta
   };
 
   return res.status(200).json(jsonResponse);
