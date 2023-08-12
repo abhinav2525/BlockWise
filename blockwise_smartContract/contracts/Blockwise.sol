@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 // Uncomment this line to use console.log
-//import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract Blockwise {
     // Define the Owner of the smart contract
@@ -61,20 +61,15 @@ contract Blockwise {
         uint256 requestIndex;
         bool isActive;
         address[] participants;
+        uint256 blockTime;
+        string description;
+        string name;
     }
-    mapping(address => GroupRequestMeta[]) private groupRequestMetas;
 
-    mapping(address => uint256) private numGroupRequests;
+    mapping(address => GroupRequestMeta[]) public groupRequestMetas;
+    mapping(address => uint256) public numGroupRequests;
     mapping(address => mapping(uint256 => GroupRequest))
-        private userGroupRequests;
-
-    event GroupRequestCreated(address creator, uint256 index);
-
-    // struct CreatorGroupRequestIndex {
-    //     address creator;
-    //     uint256[] indices;
-    // }
-
+        public userGroupRequests;
     mapping(address => uint256[]) public creatorGroupRequestIndices;
 
     function createGroupRequest(
@@ -97,25 +92,19 @@ contract Blockwise {
             newGroupRequest.acceptances[participants[i]] = false;
         }
 
-        for (uint256 i = 0; i < participants.length; i++) {
-            newGroupRequest.acceptances[participants[i]] = false;
-        }
-
         GroupRequestMeta memory newMeta = GroupRequestMeta({
             creator: msg.sender,
             requestIndex: requestIndex,
             isActive: true,
-            participants: participants
+            participants: participants,
+            description: description,
+            blockTime: block.timestamp,
+            name: names[msg.sender].name
         });
 
         for (uint256 i = 0; i < participants.length; i++) {
             groupRequestMetas[participants[i]].push(newMeta);
         }
-
-        // Update the mapping with the creator's address and requestIndex
-        // creatorGroupRequestIndices[msg.sender].push(requestIndex);
-
-        // emit GroupRequestCreated(msg.sender, requestIndex);
 
         return requestIndex;
     }
@@ -123,7 +112,13 @@ contract Blockwise {
     function getGroupRequestMetasIfParticipant(address _user)
         public
         view
-        returns (address[] memory, uint256[] memory)
+        returns (
+            address[] memory,
+            string[] memory,
+            uint256[] memory,
+            string[] memory,
+            uint256[] memory
+        )
     {
         uint256 count = 0;
         for (uint256 i = 0; i < groupRequestMetas[_user].length; i++) {
@@ -132,35 +127,25 @@ contract Blockwise {
             }
         }
 
-        address[] memory creators = new address[](count);
+        address[] memory creator = new address[](count);
         uint256[] memory requestIndices = new uint256[](count);
-
+        string[] memory name = new string[](count);
+        string[] memory description = new string[](count);
+        uint256[] memory timestamp = new uint256[](count);
         uint256 j = 0;
         for (uint256 i = 0; i < groupRequestMetas[_user].length; i++) {
             if (groupRequestMetas[_user][i].isActive) {
-                creators[j] = groupRequestMetas[_user][i].creator;
+                creator[j] = groupRequestMetas[_user][i].creator;
                 requestIndices[j] = groupRequestMetas[_user][i].requestIndex;
+                name[j] = groupRequestMetas[_user][i].name;
+                description[j] = groupRequestMetas[_user][i].description;
+                timestamp[j] = groupRequestMetas[_user][i].blockTime;
                 j++;
             }
         }
 
-        return (creators, requestIndices);
+        return (creator, name, requestIndices, description, timestamp);
     }
-
-    // function getGroupRequestIndices(address creator)
-    //     public
-    //     view
-    //     returns (uint256[] memory)
-    // {
-    //     uint256 count = numGroupRequests[creator];
-    //     uint256[] memory indices = new uint256[](count);
-
-    //     for (uint256 i = 0; i < count; i++) {
-    //         indices[i] = i;
-    //     }
-
-    //     return indices;
-    // }
 
     function acceptGroupRequest(address creator, uint256 groupRequestId)
         public
@@ -170,14 +155,27 @@ contract Blockwise {
             groupRequestId
         ];
 
+        // Check if the group request is active
+        require(groupRequest.active, "Group request is not active");
+
         // check  owner cannot acceptGroupRequest
         require(
             groupRequest.requestor != msg.sender,
             "Creator cannot accept the request"
         );
 
-        // Check if the group request is active
-        require(groupRequest.active, "Group request is not active");
+        // Check if the caller is one of the participants
+        bool isParticipant = false;
+        for (uint256 i = 0; i < groupRequest.participants.length; i++) {
+            if (groupRequest.participants[i] == msg.sender) {
+                isParticipant = true;
+                break;
+            }
+        }
+        require(
+            isParticipant,
+            "You are not a participant in this group request"
+        );
 
         // Check if groupRequest has already been accepted by the current user
         require(
@@ -191,20 +189,41 @@ contract Blockwise {
         // Mark the current user's acceptance as true
         groupRequest.acceptances[msg.sender] = true;
 
-        executeGroupRequest(groupRequest.requestor,groupRequestId);
+        executeGroupRequest(groupRequest.requestor, groupRequestId);
+    }
+
+    function deleteGroupRequest(address creator, uint256 groupRequestId)
+        public
+    {
+        // Fetch the groupRequest using the ID
+        GroupRequest storage groupRequest = userGroupRequests[creator][
+            groupRequestId
+        ];
+
+        require(groupRequest.active, "Group request no longer exists");
+
+        bool isParticipant = false;
+        for (uint256 i = 0; i < groupRequest.participants.length; i++) {
+            if (groupRequest.participants[i] == msg.sender) {
+                isParticipant = true;
+                break;
+            }
+        }
+        require(
+            isParticipant,
+            "You are not a participant in this group request"
+        );
+        toDeleteGroupRequestMeta(creator, groupRequestId);
+        groupRequest.active = false;
     }
 
     function executeGroupRequest(address creator, uint256 groupRequestId)
         public
     {
         // Fetch the groupRequest using the ID
-        GroupRequest storage groupRequest = userGroupRequests[creator][groupRequestId];
-
-        // check if owner can of executeGroupRequest
-        // require(
-        //     groupRequest.requestor == msg.sender,
-        //     "Only Creator can execute Request"
-        // );
+        GroupRequest storage groupRequest = userGroupRequests[creator][
+            groupRequestId
+        ];
 
         // Check if the group request is active
         require(groupRequest.active, "Group request is not active");
@@ -227,9 +246,16 @@ contract Blockwise {
             );
         }
 
-
-
         // After the group request has been successfully executed, set the isActive flag to false for the appropriate GroupRequestMeta
+        toDeleteGroupRequestMeta(creator, groupRequestId);
+
+        // Mark the groupRequest as inactive
+        groupRequest.active = false;
+    }
+
+    function toDeleteGroupRequestMeta(address creator, uint256 groupRequestId)
+        private
+    {
         for (
             uint256 i = 0;
             i < userGroupRequests[creator][groupRequestId].participants.length;
@@ -252,13 +278,7 @@ contract Blockwise {
                 }
             }
         }
-        
-
-        // Mark the groupRequest as inactive
-        groupRequest.active = false;
     }
-
-
 
     //Struct for storing Requests and their status (pending/accepted or rejected).
     mapping(address => userName) names;
@@ -334,7 +354,7 @@ contract Blockwise {
         requests[user].push(newRequest); // pushing it to other person's requests
     }
 
-        function createRequestExe(
+    function createRequestExe(
         address requestor,
         address user,
         uint256 _amount,
@@ -351,6 +371,7 @@ contract Blockwise {
         }
         requests[user].push(newRequest); // pushing it to other person's requests
     }
+
     //Pay a Request
 
     function payRequest(uint256 _request) public payable {

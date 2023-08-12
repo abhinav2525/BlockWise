@@ -15,20 +15,6 @@ app.get("/", (req, res) => {
   res.send("<h1> Hello from blockWise Backend APIs</h1>");
 });
 
-app.get("/getGroupRequestMetasIfParticipant", async (req, res) => {
-  const { userAddress } = req.query;
-
-  const sixResponse = await Moralis.EvmApi.utils.runContractFunction({
-    chain: "0x13881",
-    address: process.env.BLOCKWISE_ADDRESS,
-    functionName: "getGroupRequestMetasIfParticipant",
-    abi: ABI,
-    params: { _user: userAddress },
-  });
-
-  return res.status(200).send(sixResponse);
-
-})
 
 function transformMetaData(data) {
   let output = [];
