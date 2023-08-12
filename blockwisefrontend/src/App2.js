@@ -30,7 +30,7 @@ function App() {
   //   connector: new MetaMaskConnector(),
   // });
 
-  const [name, setName] = useState("...");
+  const [name, setName] = useState("");
   const [balance, setBalance] = useState("...");
   const [dollars, setDollars] = useState("...");
   const [history, setHistory] = useState(null);
@@ -138,7 +138,7 @@ function App() {
 
           <>
 
-            {isConnected ? (
+            {isConnected && !name ? (
               <>
                 <UserName
                   name={name}

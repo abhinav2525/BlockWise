@@ -29,7 +29,6 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
 
 
 
-
   const friendsOptions = friends.map(friend => ({
     label: friend.name,
     value: friend.address,
@@ -152,7 +151,7 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
       key: "description"
     },
     {
-      title: "Created on",
+      title: "Created",
       dataIndex: "timestamp",
       key: "timestamp",
       render: (_, row) => {
@@ -160,7 +159,7 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
       },
     },
     {
-      title: "Accept Request",
+      title: "Accept",
       dataIndex: "requestID",
       key: "requestID",
       render: (_, row) => {
@@ -184,6 +183,14 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
         }}> {acceptLoading && loadingIdx === _ ? <Spin /> : <><CheckOutlined style={{ fontSize: "18px" }} /> Accept</>}
 
         </Button>
+      },
+    },
+    {
+      title: "Decline",
+      dataIndex: "timestamp",
+      key: "requestID",
+      render: (_, row) => {
+        return <Button type="primary" danger>Decline</Button>
       },
     }
   ]
@@ -258,6 +265,7 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
             onChange={handleFriendSelect}
             options={friendsOptions}
           />
+ 
         </Space>
         <p>Message</p>
         <Input placeholder="description" value={requestMessage} onChange={(val) => setRequestMessage(val.target.value)} />

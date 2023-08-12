@@ -41,7 +41,7 @@ const UserName = ({
           <div>
             <Button
               type={"primary"}
-              className="quickOption"
+              
               onClick={() => {
                 showNameModal();
               }}
