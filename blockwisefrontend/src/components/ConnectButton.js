@@ -1,14 +1,14 @@
 import { Button } from "antd";
 
 const ConnectButton = ({ connect }) => (
-  <Button
-    type={"primary"}
+  <button
+    className="connect-btn"
     onClick={() => {
       connect();
     }}
   >
     Connect Wallet
-  </Button>
+  </button>
 );
 
 export default ConnectButton;

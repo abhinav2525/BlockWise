@@ -11,8 +11,11 @@ const LandingPage = () => {
     connector: new MetaMaskConnector(),
   });
   return (
-    <div>
-      <ConnectButton connect={connect} />
+    <div className='container'>
+      <div className="column"></div>
+      <div className="column center-grid">
+        <ConnectButton connect={connect} />
+      </div>
     </div>
   );
 };

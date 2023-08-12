@@ -5,3 +5,38 @@ body{
     -o-background-size: cover;
     background-size: cover;
 }
+
+
+.container {
+    display: flex;
+    height: 100vh; /* ensures the container takes up the full viewport height */
+}
+
+.column {
+    flex: 1; /* this ensures both columns share the available space equally */
+    padding: 10px;
+    border: 1px solid black; /* optional, just for visualization */
+    box-sizing: border-box; /* ensures padding and border are included in the column's width */
+}
+
+.center-grid {
+    display: grid;
+    place-items: center;
+}
+
+.connect-btn:hover {
+    background-color: #5A06E9;
+    cursor: pointer;
+    font-weight: normal; 
+}
+
+.connect-btn {
+    background-color: #8347E5;
+    border-radius: 25px; 
+    border: none; 
+    color: white; 
+    font-weight: bold; 
+    font-size: 16px; 
+    height: 50px; 
+    width: 200px
+}
