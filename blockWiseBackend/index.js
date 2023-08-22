@@ -66,7 +66,7 @@ function transformData(input) {
   return output;
 }
 
-app.get("/getNameAndBalance", async (req, res) => {
+app.get("/getUserInfo", async (req, res) => {
   const { userAddress } = req.query;
 
   const response = await Moralis.EvmApi.utils.runContractFunction({

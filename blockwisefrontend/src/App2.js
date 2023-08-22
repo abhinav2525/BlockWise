@@ -91,7 +91,7 @@ function App() {
   const { write: writeAddFriend } = useContractWrite(addFriendAddress);
 
   async function getNameAndBalance() {
-    const res = await axios.get(`http://localhost:3001/getNameAndBalance`, {
+    const res = await axios.get(`http://localhost:3001/getUserInfo`, {
       params: { userAddress: address },
     });
     const response = res.data;

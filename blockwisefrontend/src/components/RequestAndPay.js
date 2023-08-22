@@ -172,10 +172,10 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
           setGroupReqId(row.requestID);
           setTimeout(() => {
 
-            GroupRequestAccept();
+            GroupRequestAccept?.();
             setAcceptLoading(false);
             setLoadingIdx(-1)
-          }, [2000])
+          }, [5000])
           setAcceptLoading(true)
           setLoadingIdx(_)
 
@@ -185,14 +185,14 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
         </Button>
       },
     },
-    {
-      title: "Decline",
-      dataIndex: "timestamp",
-      key: "requestID",
-      render: (_, row) => {
-        return <Button type="primary" danger>Decline</Button>
-      },
-    }
+    // {
+    //   title: "Decline",
+    //   dataIndex: "timestamp",
+    //   key: "requestID",
+    //   render: (_, row) => {
+    //     return <Button type="primary" danger>Decline</Button>
+    //   },
+    // }
   ]
 
   return (
