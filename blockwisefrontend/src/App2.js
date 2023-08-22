@@ -92,22 +92,30 @@ function App() {
 
   const { write: writeAddFriend } = useContractWrite(addFriendAddress);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   async function getNameAndBalance() {
-    const res = await axios.get(`http://localhost:3001/getUserInfo`, {
-      params: { userAddress: address },
-    });
-    const response = res.data;
-    if (response.name[1]) {
-      setName(response.name[0]);
-    } else {
-      setName();
+    try {
+      setIsLoading(true);
+      const res = await axios.get(`http://localhost:3001/getUserInfo`, {
+        params: { userAddress: address },
+      });
+      const response = res.data;
+      if (response.name[1]) {
+        setName(response.name[0]);
+      } else {
+        setName();
+      }
+      setBalance(String(response.balance));
+      setDollars(String(response.dollars));
+      setHistory(response.history);
+      setRequests(response.requests);
+      setFriends(response.friends);
+      setGroupReqAcpt(response.groupRequest);
+      setIsLoading(false);
+    } catch (e) {
+      setIsLoading(false);
     }
-    setBalance(String(response.balance));
-    setDollars(String(response.dollars));
-    setHistory(response.history);
-    setRequests(response.requests);
-    setFriends(response.friends);
-    setGroupReqAcpt(response.groupRequest);
   }
 
   // useEffect(() => console.log(groupReqAcpt))
@@ -141,6 +149,7 @@ function App() {
             {isConnected && !name ? (
               <>
                 <UserName
+                  isLoading={isLoading}
                   name={name}
                   disconnectAndSetNull={disconnectAndSetNull}
                   nameModal={nameModal}
@@ -165,6 +174,7 @@ function App() {
                   {/* <img src={logo} alt="logo" className="logo" /> */}
                   {isConnected && (
                     <>
+                      <div style={{ fontSize: "28px" }}>BlockWise</div>
                       <div
                         className="menuOption"
                         style={{ borderBottom: "1.5px solid black" }}

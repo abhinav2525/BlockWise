@@ -4,6 +4,7 @@ import {
   SwapOutlined,
   UsergroupAddOutlined,
   CheckOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import {
   Modal,
@@ -33,6 +34,7 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
   const [acceptLoading, setAcceptLoading] = useState(false);
   const [loadingIdx, setLoadingIdx] = useState(-1);
 
+  const [declineLoading, setDeclineLoading] = useState(false);
   // const [groupReqaddress, setGroupReqaddress] = useState('0x9C1FD19f360B6181B67D8EeCF0739FE2EF5C1D23');
   // const [groupReqId, setGroupReqId] = useState(1);
 
@@ -240,10 +242,21 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
               setGroupReqId(row.requestID);
               setTimeout(() => {
                 GroupRequestDelete?.();
+                setDeclineLoading(false);
+                setLoadingIdx(-1);
               }, 2000);
+              setDeclineLoading(true);
+              setLoadingIdx(_);
             }}
           >
-            Decline
+            {" "}
+            {declineLoading && loadingIdx === _ ? (
+              <Spin />
+            ) : (
+              <>
+                <CloseOutlined style={{ fontSize: "18px" }} /> Decline
+              </>
+            )}
           </Button>
         );
       },

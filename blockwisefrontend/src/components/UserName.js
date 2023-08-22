@@ -1,8 +1,9 @@
-import { Button, Modal, Input } from "antd";
+import { Button, Modal, Input, Spin } from "antd";
 import { FormOutlined } from "@ant-design/icons";
 import "../App.css";
 import "../LandingPage.css";
 const UserName = ({
+  isLoading,
   name,
   disconnectAndSetNull,
   nameModal,
@@ -44,25 +45,36 @@ const UserName = ({
               column="column center-grid"
               style={{ flex: "1", display: "grid", placeItems: "center" }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <button
-                  className="connect-btn"
-                  onClick={() => {
-                    showNameModal();
+              {isLoading ? (
+                <Spin size="large">
+                  <div className="content" />
+                </Spin>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
                   }}
                 >
-                  <FormOutlined style={{ fontSize: "18px" }} />
-                  Set Username
-                </button>
-                <button className="connect-btn" onClick={disconnectAndSetNull}>
-                  Disconnect Wallet
-                </button>
-              </div>
+                  <button
+                    className="connect-btn"
+                    style={{ margin: "20px" }}
+                    onClick={() => {
+                      showNameModal();
+                    }}
+                  >
+                    <FormOutlined style={{ fontSize: "18px" }} />
+                    Set Username
+                  </button>
+                  <button
+                    className="connect-btn"
+                    style={{ margin: "20px" }}
+                    onClick={disconnectAndSetNull}
+                  >
+                    Disconnect Wallet
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </>
