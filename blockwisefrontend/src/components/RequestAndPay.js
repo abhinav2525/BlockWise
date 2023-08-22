@@ -1,20 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { DollarOutlined, SwapOutlined, UsergroupAddOutlined, CheckOutlined } from "@ant-design/icons";
-import { Modal, Input, InputNumber, Select, Space, Card, Table, Button, } from "antd";
-import { usePrepareContractWrite, useContractWrite, useWaitForTransaction } from "wagmi";
+import {
+  DollarOutlined,
+  SwapOutlined,
+  UsergroupAddOutlined,
+  CheckOutlined,
+} from "@ant-design/icons";
+import {
+  Modal,
+  Input,
+  InputNumber,
+  Select,
+  Space,
+  Card,
+  Table,
+  Button,
+} from "antd";
+import {
+  usePrepareContractWrite,
+  useContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 import { polygonMumbai } from "@wagmi/chains";
 import ABI from "../abi.json";
-import { Spin } from 'antd';
-
+import { Spin } from "antd";
 
 function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
   const [payModal, setPayModal] = useState(false);
   const [requestModal, setRequestModal] = useState(false);
   const [groupRequestModel, setGroupRequestModel] = useState(false);
-  const [groupRequestAcceptModel, setGroupRequestAcceptModel] = useState(false)
+  const [groupRequestAcceptModel, setGroupRequestAcceptModel] = useState(false);
 
-  const [acceptLoading, setAcceptLoading] = useState(false)
-  const [loadingIdx, setLoadingIdx] = useState(-1)
+  const [acceptLoading, setAcceptLoading] = useState(false);
+  const [loadingIdx, setLoadingIdx] = useState(-1);
 
   // const [groupReqaddress, setGroupReqaddress] = useState('0x9C1FD19f360B6181B67D8EeCF0739FE2EF5C1D23');
   // const [groupReqId, setGroupReqId] = useState(1);
@@ -27,13 +44,10 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
   const [requestAddress, setRequestAddress] = useState("");
   const [requestMessage, setRequestMessage] = useState("");
 
-
-
-  const friendsOptions = friends.map(friend => ({
+  const friendsOptions = friends.map((friend) => ({
     label: friend.name,
     value: friend.address,
   }));
-
 
   const handleFriendSelect = (value) => {
     setRequestGroupAddress(value);
@@ -60,7 +74,8 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
     args: [requestAddress, requestAmount, requestMessage],
   });
 
-  const { write: writeRequest, data: dataRequest } = useContractWrite(configRequest);
+  const { write: writeRequest, data: dataRequest } =
+    useContractWrite(configRequest);
 
   const { config: configGroupRequest } = usePrepareContractWrite({
     chainId: polygonMumbai.id,
@@ -72,42 +87,48 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
 
   // useEffect(() => {console.log({configGroupRequest})},[configGroupRequest]);
 
-  const { write: groupRequest, data: groupRequestData } = useContractWrite(configGroupRequest);
+  const { write: groupRequest, data: groupRequestData } =
+    useContractWrite(configGroupRequest);
 
-  const { config: configGroupRequestAccept, error: groupRequestAcceptError } = usePrepareContractWrite({
-    chainId: polygonMumbai.id,
-    address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
-    abi: ABI,
-    functionName: "acceptGroupRequest",
-    args: [groupReqaddress, groupReqId],
-  });
+  const { config: configGroupRequestAccept, error: groupRequestAcceptError } =
+    usePrepareContractWrite({
+      chainId: polygonMumbai.id,
+      address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
+      abi: ABI,
+      functionName: "acceptGroupRequest",
+      args: [groupReqaddress, groupReqId],
+    });
 
-  useEffect(() => { console.log({ configGroupRequestAccept, groupRequestAcceptError }) }, [configGroupRequestAccept, groupRequestAcceptError]);
+  useEffect(() => {
+    console.log({ configGroupRequestAccept, groupRequestAcceptError });
+  }, [configGroupRequestAccept, groupRequestAcceptError]);
 
-  const { write: GroupRequestAccept, data: groupRequestAcceptData } = useContractWrite(configGroupRequestAccept);
+  const { write: GroupRequestAccept, data: groupRequestAcceptData } =
+    useContractWrite(configGroupRequestAccept);
 
+  const { config: configGroupRequestDelete, error: groupRequestDeleteError } =
+    usePrepareContractWrite({
+      chainId: polygonMumbai.id,
+      address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
+      abi: ABI,
+      functionName: "deleteGroupRequest",
+      args: [groupReqaddress, groupReqId],
+    });
 
-  const { config: configGroupRequestDelete, error: groupRequestDeleteError } = usePrepareContractWrite({
-    chainId: polygonMumbai.id,
-    address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
-    abi: ABI,
-    functionName: "deleteGroupRequest",
-    args: [groupReqaddress, groupReqId],
-  });
-
-  const { write: GroupRequestDelete, data: groupRequestDeleteData } = useContractWrite(configGroupRequestDelete);
+  const { write: GroupRequestDelete, data: groupRequestDeleteData } =
+    useContractWrite(configGroupRequestDelete);
 
   const { isSuccess } = useWaitForTransaction({
     hash: data?.hash,
-  })
+  });
 
   const { isSuccess: isSuccessRequest } = useWaitForTransaction({
     hash: dataRequest?.hash,
-  })
+  });
 
   const { isSuccess: isSuccessGroupRequest } = useWaitForTransaction({
     hash: dataRequest?.hash,
-  })
+  });
 
   const showPayModal = () => {
     setPayModal(true);
@@ -125,19 +146,19 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
 
   const showGroupRequestModel = () => {
     setGroupRequestModel(true);
-  }
+  };
 
   const hideGroupRequestModel = () => {
     setGroupRequestModel(false);
-  }
+  };
 
   const showGroupRequesAccepttModel = () => {
     setGroupRequestAcceptModel(true);
-  }
+  };
 
   const hideGroupRequestAcceptModel = () => {
     setGroupRequestAcceptModel(false);
-  }
+  };
 
   // useEffect(()  => {
   //   console.log({groupReqaddress, groupReqId})
@@ -148,25 +169,28 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
       getNameAndBalance();
     }
     // console.log(setRequestGroupAddress);
-  }, [isSuccess, isSuccessRequest, isSuccessGroupRequest])
+  }, [isSuccess, isSuccessRequest, isSuccessGroupRequest]);
 
   const columns = [
     {
       title: "Creator",
       dataIndex: "name",
-      key: "name"
+      key: "name",
     },
     {
       title: "Description",
       dataIndex: "description",
-      key: "description"
+      key: "description",
     },
     {
       title: "Created",
       dataIndex: "timestamp",
       key: "timestamp",
       render: (_, row) => {
-        return new Intl.DateTimeFormat('en-US', { timeStyle: 'medium' }).format(new Date(_ * 1000), {})
+        return new Intl.DateTimeFormat("en-US", { timeStyle: "medium" }).format(
+          new Date(_ * 1000),
+          {}
+        );
       },
     },
     {
@@ -174,23 +198,32 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
       dataIndex: "requestID",
       key: "requestID",
       render: (_, row) => {
-
-        return <Button type={"primary"} onClick={() => {
-          console.log({ thisVar: _ })
-          setGroupReqaddress(row.address);
-          setGroupReqId(row.requestID);
-          setTimeout(() => {
-            GroupRequestAccept?.();
-            setAcceptLoading(false);
-            setLoadingIdx(-1)
-          }, [5000])
-          setAcceptLoading(true)
-          setLoadingIdx(_)
-
-
-        }}> {acceptLoading && loadingIdx === _ ? <Spin /> : <><CheckOutlined style={{ fontSize: "18px" }} /> Accept</>}
-
-        </Button>
+        return (
+          <Button
+            type={"primary"}
+            onClick={() => {
+              console.log({ thisVar: _ });
+              setGroupReqaddress(row.address);
+              setGroupReqId(row.requestID);
+              setTimeout(() => {
+                GroupRequestAccept?.();
+                setAcceptLoading(false);
+                setLoadingIdx(-1);
+              }, [5000]);
+              setAcceptLoading(true);
+              setLoadingIdx(_);
+            }}
+          >
+            {" "}
+            {acceptLoading && loadingIdx === _ ? (
+              <Spin />
+            ) : (
+              <>
+                <CheckOutlined style={{ fontSize: "18px" }} /> Accept
+              </>
+            )}
+          </Button>
+        );
       },
     },
     {
@@ -198,17 +231,24 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
       dataIndex: "timestamp",
       key: "requestID",
       render: (_, row) => {
-        return <Button type="primary" danger onClick={()=>{
-          setGroupReqaddress(row.address);
-          setGroupReqId(row.requestID);
-          setTimeout(()=> {
-            GroupRequestDelete?.();
-          })
-
-        }}>Decline</Button>
+        return (
+          <Button
+            type="primary"
+            danger
+            onClick={() => {
+              setGroupReqaddress(row.address);
+              setGroupReqId(row.requestID);
+              setTimeout(() => {
+                GroupRequestDelete?.();
+              }, 2000);
+            }}
+          >
+            Decline
+          </Button>
+        );
       },
-    }
-  ]
+    },
+  ];
 
   return (
     <>
@@ -243,11 +283,22 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
         cancelText="Cancel"
       >
         <p>Amount (Matic)</p>
-        <InputNumber value={requestAmount} onChange={(val) => setRequestAmount(val)} />
+        <InputNumber
+          value={requestAmount}
+          onChange={(val) => setRequestAmount(val)}
+        />
         <p>From (address)</p>
-        <Input placeholder="0x..." value={requestAddress} onChange={(val) => setRequestAddress(val.target.value)} />
+        <Input
+          placeholder="0x..."
+          value={requestAddress}
+          onChange={(val) => setRequestAddress(val.target.value)}
+        />
         <p>Message</p>
-        <Input placeholder="Lunch Bill..." value={requestMessage} onChange={(val) => setRequestMessage(val.target.value)} />
+        <Input
+          placeholder="Lunch Bill..."
+          value={requestMessage}
+          onChange={(val) => setRequestMessage(val.target.value)}
+        />
       </Modal>
 
       <Modal
@@ -262,11 +313,14 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
         cancelText="Cancel"
       >
         <p>Amount (Matic)</p>
-        <InputNumber value={requestAmount} onChange={(val) => setRequestAmount(val)} />
+        <InputNumber
+          value={requestAmount}
+          onChange={(val) => setRequestAmount(val)}
+        />
         <p>Add people</p>
         <Space
           style={{
-            width: '100%',
+            width: "100%",
           }}
           direction="vertical"
         >
@@ -274,18 +328,22 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
             mode="multiple"
             allowClear
             style={{
-              width: '100%',
+              width: "100%",
             }}
             placeholder="Please select your friends for the split"
             onChange={handleFriendSelect}
             options={friendsOptions}
           />
- 
         </Space>
         <p>Message</p>
-        <Input placeholder="description" value={requestMessage} onChange={(val) => setRequestMessage(val.target.value)} />
+        <Input
+          placeholder="description"
+          value={requestMessage}
+          onChange={(val) => setRequestMessage(val.target.value)}
+        />
       </Modal>
       <Modal
+        width="450"
         title="Accept Group Requests"
         open={groupRequestAcceptModel}
         onOk={() => {
@@ -300,10 +358,7 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
             columns={columns}
             pagination={{ position: ["bottomCenter"], pageSize: 8 }}
           />
-
         </Card>
-
-
       </Modal>
       <div className="requestAndPay">
         <div

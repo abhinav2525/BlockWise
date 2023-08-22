@@ -44,19 +44,24 @@ const UserName = ({
               column="column center-grid"
               style={{ flex: "1", display: "grid", placeItems: "center" }}
             >
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <Button
-                  type={"primary"}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <button
+                  className="connect-btn"
                   onClick={() => {
                     showNameModal();
                   }}
                 >
                   <FormOutlined style={{ fontSize: "18px" }} />
-                  set username
-                </Button>
-                <Button type={"primary"} onClick={disconnectAndSetNull}>
+                  Set Username
+                </button>
+                <button className="connect-btn" onClick={disconnectAndSetNull}>
                   Disconnect Wallet
-                </Button>
+                </button>
               </div>
             </div>
           </div>
