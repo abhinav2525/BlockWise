@@ -5,7 +5,8 @@ import { Layout, Button, Alert, Space, notification } from "antd";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import {
   usePrepareContractWrite,
-  useContractWrite, useWaitForTransaction
+  useContractWrite,
+  useWaitForTransaction,
 } from "wagmi";
 import { polygonMumbai } from "@wagmi/chains";
 import axios from "axios";
@@ -36,19 +37,17 @@ function App() {
   const [history, setHistory] = useState(null);
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState({ 1: [0], 0: [] });
-  const [groupReqAcpt,setGroupReqAcpt] = useState('');
-
+  const [groupReqAcpt, setGroupReqAcpt] = useState("");
 
   const [nameModal, setNameModal] = useState(false);
   const [modalName, setModalName] = useState("");
-
 
   const [friendModal, setFriendModal] = useState(false);
   const [friend, setFriend] = useState("");
 
   function disconnectAndSetNull() {
     disconnect();
-    setName("...");
+    setName("");
     setBalance("...");
     setDollars("...");
     setHistory(null);
@@ -69,7 +68,7 @@ function App() {
 
   const { isSuccess } = useWaitForTransaction({
     hash: addNameData?.hash,
-  })
+  });
 
   const { config: addFriendAddress } = usePrepareContractWrite({
     address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
@@ -79,12 +78,15 @@ function App() {
     args: [friend],
     onError(error) {
       // console.log('error', error.reason)
-      if(error.reason === 'resolver or addr is not configured for ENS name'|| error.reason === 'error network does not support ENS'){
+      if (
+        error.reason === "resolver or addr is not configured for ENS name" ||
+        error.reason === "error network does not support ENS"
+      ) {
         return;
       }
-     notification.error({
-      description: error.reason
-     })
+      notification.error({
+        description: error.reason,
+      });
     },
   });
 
@@ -133,11 +135,9 @@ function App() {
 
   return (
     <>
-      <Space direction="vertical" style={{ width: '100%' }}>
+      <Space direction="vertical" style={{ width: "100%" }}>
         <div className="App">
-
           <>
-
             {isConnected && !name ? (
               <>
                 <UserName
@@ -180,7 +180,6 @@ function App() {
                 </div>
                 {isConnected ? (
                   <>
-
                     <AddFriend
                       name={name}
                       friendModal={friendModal}
@@ -190,10 +189,7 @@ function App() {
                       friend={friend}
                       setFriend={setFriend}
                     />
-                    <ShowFriendsButton
-                      name={name}
-                      friends={friends}
-                    />
+                    <ShowFriendsButton name={name} friends={friends} />
                     <Button type={"primary"} onClick={disconnectAndSetNull}>
                       Disconnect Wallet
                     </Button>
@@ -203,25 +199,28 @@ function App() {
                   // <ConnectButton connect={connect} />
                 )}
               </Header>
-             
-              <Content className="content">
+
+              <Content className="content" style={{ height: "100vh" }}>
                 {isConnected ? (
                   <>
                     <div className="firstColumn">
                       <CurrentBalance dollars={dollars} />
-                      <RequestAndPay requests={requests} getNameAndBalance={getNameAndBalance} friends={friends} groupReqAcpt={groupReqAcpt}/>
+                      <RequestAndPay
+                        requests={requests}
+                        getNameAndBalance={getNameAndBalance}
+                        friends={friends}
+                        groupReqAcpt={groupReqAcpt}
+                      />
                       <AccountDetails
                         address={address}
                         name={name}
                         balance={balance}
                       />
-
                     </div>
                     <div className="secondColumn">
                       <RecentActivity history={history} />
                     </div>
                   </>
-
                 ) : (
                   <>
                     {/* <div>Please Login</div> */}
@@ -230,17 +229,16 @@ function App() {
                 )}
               </Content>
             </Layout>
-          )
-            : (
-              <>
-                {/* <ConnectButton connect={connect} />  */}
-                <LandingPage />
-              </>)
-          }
+          ) : !name && !isConnected ? (
+            <>
+              {/* <ConnectButton connect={connect} />  */}
+              <LandingPage />
+            </>
+          ) : (
+            <></>
+          )}
         </div>
-        <>
-
-        </>
+        <></>
       </Space>
     </>
   );
