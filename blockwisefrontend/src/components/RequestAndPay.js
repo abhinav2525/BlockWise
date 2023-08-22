@@ -86,6 +86,17 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
 
   const { write: GroupRequestAccept, data: groupRequestAcceptData } = useContractWrite(configGroupRequestAccept);
 
+
+  const { config: configGroupRequestDelete, error: groupRequestDeleteError } = usePrepareContractWrite({
+    chainId: polygonMumbai.id,
+    address: process.env.REACT_APP_BLOCKWISE_ADDRESS,
+    abi: ABI,
+    functionName: "deleteGroupRequest",
+    args: [groupReqaddress, groupReqId],
+  });
+
+  const { write: GroupRequestDelete, data: groupRequestDeleteData } = useContractWrite(configGroupRequestDelete);
+
   const { isSuccess } = useWaitForTransaction({
     hash: data?.hash,
   })
@@ -166,12 +177,9 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
 
         return <Button type={"primary"} onClick={() => {
           console.log({ thisVar: _ })
-          // console.log({address: row.address,
-          // requestID: row.requestID});
           setGroupReqaddress(row.address);
           setGroupReqId(row.requestID);
           setTimeout(() => {
-
             GroupRequestAccept?.();
             setAcceptLoading(false);
             setLoadingIdx(-1)
@@ -185,14 +193,21 @@ function RequestAndPay({ requests, getNameAndBalance, friends, groupReqAcpt }) {
         </Button>
       },
     },
-    // {
-    //   title: "Decline",
-    //   dataIndex: "timestamp",
-    //   key: "requestID",
-    //   render: (_, row) => {
-    //     return <Button type="primary" danger>Decline</Button>
-    //   },
-    // }
+    {
+      title: "Decline",
+      dataIndex: "timestamp",
+      key: "requestID",
+      render: (_, row) => {
+        return <Button type="primary" danger onClick={()=>{
+          setGroupReqaddress(row.address);
+          setGroupReqId(row.requestID);
+          setTimeout(()=> {
+            GroupRequestDelete?.();
+          })
+
+        }}>Decline</Button>
+      },
+    }
   ]
 
   return (
