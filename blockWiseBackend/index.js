@@ -43,7 +43,7 @@ function convertArrayToObjects(arr) {
     type: transaction[0],
     amount: transaction[1],
     message: transaction[2],
-    address: `${transaction[3].slice(0, 4)}...${transaction[3].slice(0, 4)}`,
+    address: `${transaction[3].slice(0, 4)}...${transaction[3].slice(38, 42)}`,
     subject: transaction[4],
     time: transaction[5],
   }));
